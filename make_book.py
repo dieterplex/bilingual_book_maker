@@ -2,6 +2,8 @@ import argparse
 import os
 import pickle
 import time
+import os
+
 from abc import abstractmethod
 from copy import copy
 from os import environ as env
@@ -208,6 +210,75 @@ class BEPUB:
             raise Exception("can not save resume file")
 
 
+class Text:
+    def __init__(self, book_name, model, key, resume):
+        self.book_name = book_name
+        self.translate_model = model(key)
+        self.origin_book = self.load_file(self.book_name).split("\n")
+        self.p_to_save = []
+        self.resume = resume
+        self.bin_path = f"{os.path.abspath(self.book_name)}.bin.temp"
+        if self.resume:
+            self.load_state()
+
+    @staticmethod
+    def _is_special_text(text):
+        return text.isdigit() or text.isspace()
+
+    def make_bilingual_book(self):
+        all_p_length = len(self.origin_book)
+        print("TODO need process bar here: " + str(all_p_length))
+        index = 0
+        p_to_save_len = len(self.p_to_save)
+        try:
+            for i in self.origin_book:
+                if self._is_special_text(i):
+                    continue
+                if self.resume and index < p_to_save_len:
+                    pass
+                else:
+                    temp = self.translate_model.translate(i)
+                    self.p_to_save.append(temp)
+                index += 1
+                if IS_TEST and index > TEST_NUM:
+                    break
+            name = self.book_name.split(".")[0]
+            self.save_file(f"{name}_bilingual.txt", self.p_to_save)
+        except (KeyboardInterrupt, Exception) as e:
+            print(e)
+            print("you can resume it next time")
+            self.save_progress()
+            exit(0)
+
+    def load_file(self, book_path):
+        try:
+            with open(book_path, "r", encoding="utf-8") as f:
+                return f.read()
+        except:
+            raise Exception("can not load file")
+
+    def save_file(self, book_path, content):
+        try:
+            with open(book_path, "w", encoding="utf-8") as f:
+                f.write("\n".join(content))
+        except:
+            raise Exception("can not save file")
+
+    def load_state(self):
+        try:
+            with open(self.bin_path, "r", encoding="utf-8") as f:
+                self.p_to_save = f.read().split("\n")
+        except:
+            raise Exception("can not load resume file")
+
+    def save_progress(self):
+        try:
+            with open(self.bin_path, "w") as f:
+                f.write("\n".join(self.p_to_save))
+        except:
+            raise Exception("can not save resume file")
+
+
 if __name__ == "__main__":
     MODEL_DICT = {"gpt3": GPT3, "chatgpt": ChatGPT}
     parser = argparse.ArgumentParser()
@@ -235,6 +306,7 @@ if __name__ == "__main__":
         "--test",
         dest="test",
         action="store_true",
+        default=False,
         help="if test we only translat 10 contents you can easily check",
     )
     parser.add_argument(
@@ -265,6 +337,7 @@ if __name__ == "__main__":
         "--resume",
         dest="resume",
         action="store_true",
+        default=False,
         help="if program accidentally stop you can use this to resume",
     )
     parser.add_argument(
@@ -289,13 +362,17 @@ if __name__ == "__main__":
     RESUME = options.resume
     if not OPENAI_API_KEY:
         raise Exception("Need openai API key, please google how to")
-    if not options.book_name.endswith(".epub"):
-        raise Exception("please use epub file")
+    if options.book_name.endswith(".epub"):
+        provider = BEPUB
+    elif options.book_name.endswith(".txt"):
+        provider = Text
+    else:
+        raise Exception("please use epub or txt file")
     model = MODEL_DICT.get(options.model, "chatgpt")
     language = options.language
     if options.language in LANGUAGES:
         # use the value for prompt
         language = LANGUAGES.get(language, language)
 
-    e = BEPUB(options.book_name, model, OPENAI_API_KEY, RESUME, language=language)
+    e = provider(options.book_name, model, OPENAI_API_KEY, RESUME, language=language)
     e.make_bilingual_book()
