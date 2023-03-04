@@ -258,7 +258,7 @@ if __name__ == "__main__":
         type=str,
         choices=sorted(LANGUAGES.keys())
         + sorted([k.title() for k in TO_LANGUAGE_CODE.keys()]),
-        default="zh-hans",
+        default="zh-hant",
         help="language to translate to",
     )
     parser.add_argument(
