@@ -57,7 +57,7 @@ def main():
         type=str,
         choices=sorted(LANGUAGES.keys())
         + sorted([k.title() for k in TO_LANGUAGE_CODE.keys()]),
-        default="zh-hans",
+        default="zh-hant",
         metavar="LANGUAGE",
         help="language to translate to, available: {%(choices)s}",
     )

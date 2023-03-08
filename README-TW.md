@@ -20,7 +20,7 @@ bilingual_book_maker 是一個 AI 翻譯工具，使用 ChatGPT 幫助使用者�
 3. 本地放了一個 animal_farm.epub 給大家測試
 4. 預設用了 [GPT-3.5-turbo](https://openai.com/blog/introducing-chatgpt-and-whisper-apis) 模型，也就是 ChatGPT 正在使用的模型，用 `--model gpt3` 來使用 gpt3 模型
 5. 加了 `--test` 命令，如果大家沒付費可以加上這個先看看效果（有 limit 稍微有些慢）
-6. Set the target language like `--language "zh-hans"`. Default target language is `zh-hans`. Support language list please see the LANGUAGES at [utils.py](./book_maker/utils.py).
+6. Set the target language like `--language "zh-hans"`. Default target language is `zh-hant`. Support language list please see the LANGUAGES at [utils.py](./book_maker/utils.py).
 7. 加了 `--proxy` 參數，方便中國大陸的使用者在本地測試時使用代理，傳入類似 `http://127.0.0.1:7890` 的字串
 8. 加入 `--resume` 命令，可以手動中斷後，加入命令繼續執行。
 9. 如果你遇到了墙需要用 Cloudflare Workers 替换 api_base 请使用 `--api_base ${url}` 来替换。**请注意，此处你输入的api应该是"`https://xxxx/v1`"的字样，域名需要用引号包裹**
@@ -33,7 +33,7 @@ bilingual_book_maker 是一個 AI 翻譯工具，使用 ChatGPT 幫助使用者�
 # 如果你想快速測一下
 python3 make_book.py --book_name test_books/animal_farm.epub --openai_key ${openai_key} --no_limit --test
 # or do it # Chinese
-python3 make_book.py --book_name test_books/animal_farm.epub --openai_key ${openai_key} --language zh-hans
+python3 make_book.py --book_name test_books/animal_farm.epub --openai_key ${openai_key} --language zh-hant
 # or 用 gpt3 模型
 export OPENAI_API_KEY=${your_api_key}
 python3 make_book.py --book_name test_books/animal_farm.epub --model gpt3 --no_limit --language ja
